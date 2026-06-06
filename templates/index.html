@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}共享大超市-首页{% endblock title %}
+{% block topfiles %}
+	<script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+{% endblock topfiles %}
+{% block body %}
+	<div class="navbar_con">
+		<div class="navbar">
+			<h1 class="fl">全部商品分类</h1>
+			<ul class="navlist fl">
+				{% for type in types %}
+				<li><a href="{% url 'goods:list' type.id 1 %}">{{ type.name }}</a></li>
+				{% if not forloop.last %}<li class="interval">|</li>{% endif %}
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+	<div class="center_con clearfix">
+		<ul class="subnav fl">
+			{% for type in types %}
+			<li><a href="#model0{{ forloop.counter }}" class="{{ type.logo }}">{{ type.name }}</a></li>
+			{% endfor %}
+		</ul>
+		<div class="slide fl" style="background:#e8460a;height:270px;text-align:center;line-height:270px;color:#fff;font-size:48px;font-weight:bold;">
+			共享大超市
+		</div>
+		<div class="adv fl" style="background:#ff6b2b;height:135px;margin-bottom:5px;text-align:center;line-height:135px;color:#fff;font-size:20px;">
+			新鲜每一天
+		</div>
+		<div class="adv fl" style="background:#ff8c42;height:130px;text-align:center;line-height:130px;color:#fff;font-size:20px;">
+			品质保证 · 急速送达
+		</div>
+	</div>
+
+	{% for type in types %}
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model0{{ forloop.counter }}">{{ type.name }}</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				精选好物
+			</div>
+			<a href="{% url 'goods:list' type.id 1 %}" class="goods_more fr">查看更多 ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+			<div class="goods_banner fl" style="background: linear-gradient(135deg, #e8460a, #ff6b2b);height:270px;text-align:center;line-height:270px;color:#fff;font-size:18px;">
+				{{ type.name }}
+			</div>
+			<ul class="goods_list fl">
+				{% for sku in type.goods_list %}
+				<li>
+					<h4><a href="{% url 'goods:detail' sku.id %}">{{ sku.name }}</a></h4>
+					<a href="{% url 'goods:detail' sku.id %}">{% if sku.image %}<img src="{{ sku.image.url }}">{% else %}<div style="background:#f5f5f5;width:80px;height:80px;text-align:center;line-height:80px;color:#ccc;font-size:12px;">无图</div>{% endif %}</a>
+					<div class="prize">¥ {{ sku.price }}</div>
+				</li>
+				{% empty %}
+				<li style="text-align:center;padding:20px;color:#999;">暂无商品</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	{% endfor %}
+{% endblock body %}
