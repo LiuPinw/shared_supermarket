@@ -26,8 +26,8 @@
 				<div class="num_add fl">
 					<input type="text" class="num_show fl" value="1">
 					<a href="javascript:;" class="add fr">+</a>
-					<a href="javascript:;" class="minus fr">-</a>	
-				</div> 
+					<a href="javascript:;" class="minus fr">-</a>
+				</div>
 			</div>
             <div>
                 <p>其他规格:</p>
@@ -163,41 +163,48 @@
         })
 
         // 获取add_cart div元素左上角的坐标
-		var $add_x = $('#add_cart').offset().top;
-		var $add_y = $('#add_cart').offset().left;
+        var $add_x = $('#add_cart').offset().top;
+        var $add_y = $('#add_cart').offset().left;
 
         // 获取show_count div元素左上角的坐标
-		var $to_x = $('#show_count').offset().top;
-		var $to_y = $('#show_count').offset().left;
+        var $to_x = $('#show_count').offset().top;
+        var $to_y = $('#show_count').offset().left;
 
-
-		$('#add_cart').click(function(){
-            // 获取商品id和商品数量
-            sku_id = $(this).attr('sku_id') // attr prop
-            count = $('.num_show').val()
+        // 封装添加到购物车的函数，供加入购物车和立即购买共用
+        function add_to_cart(sku_id, count, callback) {
             csrf = $('input[name="csrfmiddlewaretoken"]').val()
-            // 组织参数
-            params = {'sku_id':sku_id, 'count':count, 'csrfmiddlewaretoken':csrf}
-            // 发起ajax post请求，访问/cart/add, 传递参数:sku_id count
+            params = {'sku_id': sku_id, 'count': count, 'csrfmiddlewaretoken': csrf}
             $.post('/cart/add', params, function (data) {
-                if (data.res == 5){
-                    // 添加成功
-                    $(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})
-                    $(".add_jump").stop().animate({
-                        'left': $to_y+7,
-                        'top': $to_x+7},
-                        "fast", function() {
-                            $(".add_jump").fadeOut('fast',function(){
-                                // 重新设置用户购物车中商品的条目数
-                                $('#show_count').html(data.total_count);
-                            });
-			        });
-                }
-                else{
-                    // 添加失败
+                if (data.res == 5) {
+                    $('#show_count').html(data.total_count);
+                    if (callback) callback(data);
+                } else {
                     alert(data.errmsg)
                 }
             })
-		})
+        }
+
+        $('#add_cart').click(function(){
+            sku_id = $(this).attr('sku_id')
+            count = $('.num_show').val()
+            add_to_cart(sku_id, count, function(data) {
+                $(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})
+                $(".add_jump").stop().animate({
+                    'left': $to_y+7,
+                    'top': $to_x+7},
+                    "fast", function() {
+                        $(".add_jump").fadeOut('fast');
+                });
+            })
+        })
+
+        // 立即购买：加入购物车后跳转到购物车页面
+        $('.buy_btn').click(function(){
+            sku_id = $('#add_cart').attr('sku_id')
+            count = $('.num_show').val()
+            add_to_cart(sku_id, count, function() {
+                window.location.href = '/cart/'
+            })
+        })
 	</script>
 {% endblock bottomfiles %}
