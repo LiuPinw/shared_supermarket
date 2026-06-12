@@ -2,3 +2,6 @@
 .idea/
 .claude/
 .gitconfig
+whoosh_index/
+db.sqlite3
+static_root/

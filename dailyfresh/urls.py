@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.urls import re_path, include
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
@@ -25,3 +27,7 @@ urlpatterns = [
     re_path(r'^order/', include('order.urls', namespace='order')), # 订单模块
     re_path(r'^', include('goods.urls', namespace='goods')), # 商品模块
 ]
+
+# 开发环境提供媒体文件服务
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

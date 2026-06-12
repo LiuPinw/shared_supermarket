@@ -194,13 +194,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # 全文检索框架的配置（开发环境使用标准 whoosh 引擎）
+# 确保索引目录存在，避免 clone 后因缺少目录而报错
+_whoosh_path = os.path.join(BASE_DIR, 'whoosh_index')
+os.makedirs(_whoosh_path, exist_ok=True)
+
 HAYSTACK_CONNECTIONS = {
     'default': {
-        #使用whoosh引擎
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        # 'ENGINE': 'haystack.backends.whoosh_cn_backend.WhooshEngine',  # 中文分词引擎(需配置jieba)
+        # 使用 jieba 中文分词 whoosh 引擎
+        'ENGINE': 'utils.whoosh_cn_backend.WhooshEngine',
         #索引文件路径 存放索引目录
-        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+        'PATH': _whoosh_path,
     },
 }
 

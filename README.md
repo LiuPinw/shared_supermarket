@@ -14,27 +14,29 @@
 ### 安装与启动
 
 ```bash
-# 1. 创建虚拟环境
-conda create -n your_env python=3.10
+# 1. 激活 conda 环境
 conda activate homework
 
-# 2. 安装依赖
+# 2. 安装依赖（首次使用）
 pip install Django==3.2.25
 pip install celery django-haystack django-tinymce jieba Pillow PyMySQL \
     itsdangerous mutagen python-alipay-sdk Whoosh django-redis \
     django-redis-sessions fakeredis
 
-# 3. 数据库迁移
-python manage.py makemigrations user goods cart order
+# 3. 数据库迁移（首次自动创建商品数据 + 确保搜索索引目录）
 python manage.py migrate
 
-# 4. 启动开发服务器
+# 4. 构建搜索索引（首次使用）
+python manage.py rebuild_index --noinput
+
+# 5. 启动开发服务器
 python manage.py runserver
 ```
 
 访问 **http://127.0.0.1:8000**
 
-> **注意**：开发环境使用 SQLite 数据库和 fakeredis 模拟 Redis，无需额外安装 MySQL、Redis、Nginx、FastDFS 等服务。
+> **注意**：开发环境已配置为开箱即用 — SQLite 数据库（`migrate` 自动初始化商品数据）、
+> fakeredis 模拟 Redis、本地文件存储。无需额外安装 MySQL、Redis、Nginx、FastDFS 等服务。
 
 ---
 
