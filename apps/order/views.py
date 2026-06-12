@@ -190,8 +190,7 @@ class OrderCommitView(View):
         conn.hdel(cart_key, *sku_ids) # 拆包
 
         # 返回应答
-        return JsonResponse({'res': 5, 'message': '创建成功'})
-
+        return JsonResponse({'res': 5, 'message': '创建成功', 'order_id': order_id, 'pay_method': int(pay_method)})
 # 乐观锁：执行的时候不加锁，更新的时候判断是否能更新成功
 # 开启乐观锁需要设在mysql事务的隔离性级别
 class OrderCommitView1(View):
@@ -322,8 +321,7 @@ class OrderCommitView1(View):
         conn.hdel(cart_key, *sku_ids)  # 拆包
 
         # 返回应答
-        return JsonResponse({'res': 5, 'message': '创建成功'})
-
+        return JsonResponse({'res': 5, 'message': '创建成功', 'order_id': order_id, 'pay_method': int(pay_method)})
 # ajax　post
 # 前端传递的参数： 订单id(order_id)
 # /order/pay

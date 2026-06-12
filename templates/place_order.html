@@ -81,43 +81,70 @@
 {% endblock bottom %}
 {% block bottomfiles %}
 	<script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
-	<script type="text/javascript">
-		$('#order_btn').click(function() {
-            // 获取用户选择的地址id, 支付方式, 要购买的商品id字符串
-            addr_id = $('input[name="addr_id"]:checked').val()
-            if (!addr_id) {
-                alert('请先添加收货地址！');
-                return;
-            }
-            pay_method = $('input[name="pay_style"]:checked').val()
-            sku_ids = $(this).attr('sku_ids')
-            csrf = $('input[name="csrfmiddlewaretoken"]').val()
-            // alert(addr_id+":"+pay_method+':'+sku_ids)
-            // 组织参数
-            params = {'addr_id':addr_id, 'pay_method':pay_method, 'sku_ids':sku_ids,
-                        'csrfmiddlewaretoken':csrf}
-            // 发起ajax post请求，访问/order/commit, 传递的参数: addr_id pay_method, sku_ids
-            $.post('/order/commit', params, function (data) {
-                if (data.res == 5){
-                    // 创建成功
-                    localStorage.setItem('order_finish',2);
-                    $('.popup_con').fadeIn('fast', function() {
+		<script type="text/javascript">
+			$('#order_btn').click(function() {
+	            // 获取用户选择的地址id, 支付方式, 要购买的商品id字符串
+	            addr_id = $('input[name="addr_id"]:checked').val()
+	            if (!addr_id) {
+	                alert('请先添加收货地址！');
+	                return;
+	            }
+	            pay_method = $('input[name="pay_style"]:checked').val()
+	            sku_ids = $(this).attr('sku_ids')
+	            csrf = $('input[name="csrfmiddlewaretoken"]').val()
+	            // 组织参数
+	            params = {'addr_id':addr_id, 'pay_method':pay_method, 'sku_ids':sku_ids,
+	                        'csrfmiddlewaretoken':csrf}
+	            // 发起ajax post请求，访问/order/commit
+	            $.post('/order/commit', params, function (data) {
+	                if (data.res == 5){
+	                    // 创建成功 — 自动触发支付
+	                    localStorage.setItem('order_finish',2);
+	                    $('.popup_con').fadeIn('fast', function() {
+	                        setTimeout(function(){
+	                            $('.popup_con').fadeOut('fast',function(){
+	                                // 创建订单成功后立即触发支付
+	                                var pay_params = {
+	                                    'order_id': data.order_id,
+	                                    'csrfmiddlewaretoken': csrf
+	                                };
+	                                $.post('/order/pay', pay_params, function(pay_data) {
+	                                    if (pay_data.res == 3) {
+	                                        if (pay_data.pay_url.indexOf('openapi.alipaydev.com') > -1) {
+	                                            // 支付宝沙箱 — 弹出支付窗口
+	                                            window.open(pay_data.pay_url);
+	                                            // 轮询检查支付结果
+	                                            var checkParams = {
+	                                                'order_id': data.order_id,
+	                                                'csrfmiddlewaretoken': csrf
+	                                            };
+	                                            $.post('/order/check', checkParams, function(check_data) {
+	                                                if (check_data.res == 3) {
+	                                                    alert('支付成功！');
+	                                                } else {
+	                                                    alert(check_data.errmsg || '支付结果未知');
+	                                                }
+	                                                window.location.href = '/user/order/1';
+	                                            });
+	                                        } else {
+	                                            // 模拟支付 — 直接成功
+	                                            alert('支付成功(模拟)！');
+	                                            window.location.href = '/user/order/1';
+	                                        }
+	                                    } else {
+	                                        alert('支付失败：' + (pay_data.errmsg || '未知错误'));
+	                                        window.location.href = '/user/order/1';
+	                                    }
+	                                });
+	                            });
+	                        },1500)
+	                    });
+	                }
+	                else{
+	                    alert(data.errmsg)
+	                }
+	            })
+			});
+		</script>
 
-                        setTimeout(function(){
-                            $('.popup_con').fadeOut('fast',function(){
-                                window.location.href = '/user/order/1';
-                            });
-                        },3000)
-
-                    });
-                }
-                else{
-                    alert(data.errmsg)
-                }
-            })
-
-
-
-		});
-	</script>
 {% endblock bottomfiles %}
